@@ -10,4 +10,12 @@
     <ProjectReference Include="..\BeaconDesk.Domain\BeaconDesk.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dto\" />
+    <Folder Include="Interfaces\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Validation\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

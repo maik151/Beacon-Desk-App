@@ -10,4 +10,10 @@
     <ProjectReference Include="..\BeaconDesk.Application\BeaconDesk.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+    <Folder Include="Persistence\Repositories\" />
+    <Folder Include="Persistence\DbContext\" />
+  </ItemGroup>
+
 </Project>
