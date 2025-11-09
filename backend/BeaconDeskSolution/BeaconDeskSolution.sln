@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeaconDesk.Application", "B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeaconDesk.Infraestructure", "BeaconDesk.Infraestructure\BeaconDesk.Infraestructure.csproj", "{B8513361-792A-4A09-A018-01D2F8E24564}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeaconDesk.Api", "BeaconDesk.Api2\BeaconDesk.Api.csproj", "{0204BDF9-EB2B-439B-B6D2-81778BEFC840}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeaconDesk.Api2", "BeaconDesk.Api2\BeaconDesk.Api2.csproj", "{0204BDF9-EB2B-439B-B6D2-81778BEFC840}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
