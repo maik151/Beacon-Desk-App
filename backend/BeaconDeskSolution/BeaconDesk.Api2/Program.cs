@@ -33,6 +33,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -42,8 +43,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapScalarApiReference(options =>
     {
-
-        options.ProxyUrl = "/swagger/v1/swagger.json";
+        // Aquí le decimos a Scalar dónde encontrar el JSON de Swagger
+        // (Esta NO es la opción ProxyUrl que rompía las pruebas)
+        options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
     });
 }
 
