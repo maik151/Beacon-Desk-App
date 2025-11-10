@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration; // Para leer appsettings
 using Microsoft.IdentityModel.Tokens;   // Para la llave
 using System.IdentityModel.Tokens.Jwt;  // Para el Handler
 using System.Security.Claims;           // Para los Claims
-using System.Text;
+
 
 namespace BeaconDesk.Infraestructure.Services
 {

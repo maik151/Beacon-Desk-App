@@ -23,11 +23,9 @@ namespace BeaconDesk.Infraestructure.Persistence.Repositories
 
 
         //Desarrollo de los servicios de la interfaz IUsuarioRepository
-        public async Task<Usuario?> GetByEmailAsync(string email) {
-            return await _context.Usuarios
-                .Include(u => u.Rol)
-                .FirstOrDefaultAsync(u => u.Email == email);
+        public async Task<Usuario?> GetByEmailAsync(string email)
+        {
+            return await _context.Usuarios.Include(u => u.Rol).FirstOrDefaultAsync(u => u.Email == email);
         }
-
     }
 }

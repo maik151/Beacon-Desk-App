@@ -9,7 +9,9 @@ namespace BeaconDesk.Infraestructure.Persistence.DbContext
         public BeaconDeskDbContext(DbContextOptions<BeaconDeskDbContext> options) : base(options)
         {
         }
-        //Dentro de este contexto definomos las tablas que existen
+
+
+        //Dentro de este contexto definimos las tablas que existen
         //Tablas del grupo de Login
 
         public DbSet<Usuario> Usuarios { get; set; }

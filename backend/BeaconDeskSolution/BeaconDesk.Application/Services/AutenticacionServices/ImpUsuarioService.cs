@@ -18,6 +18,7 @@ namespace BeaconDesk.Application.Services.AutenticacionServices
             _tokenService = tokenService;
         }
 
+
         public async Task<string> LoginAsync(LoginRequestDto loginrequest)
         {
             try
@@ -29,7 +30,7 @@ namespace BeaconDesk.Application.Services.AutenticacionServices
                 if (usuario == null)
                 {
                     // Mejora de seguridad: Mensaje genérico
-                    throw new AuthenticationException("Usuario o contraseña incorrectos.");
+                    throw new AuthenticationException("Usuario no existe.");
                 }
 
                
@@ -38,7 +39,7 @@ namespace BeaconDesk.Application.Services.AutenticacionServices
                 if (!esPasswordValido)
                 {
                     // Mensaje genérico para no dar pistas
-                    throw new AuthenticationException("Usuario o contraseña incorrectos.");
+                    throw new AuthenticationException("Contraseña incorrecta.");
                 }
                
 

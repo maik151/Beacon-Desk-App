@@ -40,7 +40,6 @@
     "Scalar": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
       "launchUrl": "scalar",
       "applicationUrl": "https://localhost:7120;http://localhost:5262",
       "environmentVariables": {
@@ -50,7 +49,6 @@
     "Swagger": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7120;http://localhost:5262",
       "environmentVariables": {
