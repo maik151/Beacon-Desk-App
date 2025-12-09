@@ -18,10 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Middleware\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\BeaconDesk.Application\BeaconDesk.Application.csproj" />
     <ProjectReference Include="..\BeaconDesk.Infraestructure\BeaconDesk.Infraestructure.csproj" />
   </ItemGroup>

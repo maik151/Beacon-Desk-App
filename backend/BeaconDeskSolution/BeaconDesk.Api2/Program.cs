@@ -6,7 +6,8 @@ using BeaconDesk.Infraestructure.Persistence.Repositories;
 using BeaconDesk.Infraestructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-
+// IMPORTANTE: Añade el using para poder acceder a tu middleware
+using BeaconDesk.Api2.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,12 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 //Configuracion de cadena de conexion
 var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
 
-
-
 //Registar Inyeccion de dependencias del DbContext y demas Servicios
 
 builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
-        options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString));
 
 // Add services to the container.
 //Registro de Servicios de Autenticacion
@@ -36,6 +35,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// =======================================================
+// *** LÍNEA CRÍTICA: REGISTRAR EL MIDDLEWARE DE EXCEPCIONES ***
+// Debe ir antes de cualquier app.Use* para que capture todos los errores.
+app.UseMiddleware<ExceptionMiddleware>();
+// =======================================================
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -43,9 +48,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.MapScalarApiReference(options =>
     {
-        // Aquí le decimos a Scalar dónde encontrar el JSON de Swagger
-        // (Esta NO es la opción ProxyUrl que rompía las pruebas)
-        options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
+        // Aquí le decimos a Scalar dónde encontrar el JSON de Swagger
+        // (Esta NO es la opción ProxyUrl que rompía las pruebas)
+        options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
     });
 }
 
