@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AppConfigService } from './app-config.service';
-import { LoginRequest, LoginResponse } from '../../data/interfaces/auth.Interface';
+import { LoginRequest, LoginResponse } from '../../data/interfaces/auth.interface';
 import { Observable } from 'rxjs';
 
 @Injectable({
