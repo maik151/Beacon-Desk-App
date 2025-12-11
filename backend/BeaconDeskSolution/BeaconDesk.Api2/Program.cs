@@ -48,6 +48,15 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+//Configuacion del Middleware para CORS 
+app.UseHttpsRedirection();
+app.UseCors("NewPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.Run();
+
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
