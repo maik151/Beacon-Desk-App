@@ -34,7 +34,28 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
+//Solucion para el tema del CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("NewPolicy", app =>
+    {
+        app.WithOrigins("http://localhost:4200") // <--- La URL exacta de tu Angular
+           .AllowAnyMethod()                     // Permite GET, POST, PUT, DELETE
+           .AllowAnyHeader();                    // Permite enviar Tokens y Content-Type
+    });
+});
+
+
 var app = builder.Build();
+
+//Configuacion del Middleware para CORS 
+app.UseHttpsRedirection();
+app.UseCors("NewPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.Run();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
