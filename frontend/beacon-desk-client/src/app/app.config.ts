@@ -5,6 +5,10 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import { routes } from './app.routes';
 import { AppConfigService } from './core/services/app-config.service';
 
+import { withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './core/interceptors/auth.interceptors';
+
+
 // Función para cargar el JSON antes de iniciar
 export function initConfig(configService: AppConfigService) {
   return () => configService.loadConfig();
@@ -18,7 +22,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()), 
     
     // 2. SOLUCIÓN ERROR HTTP CLIENT (Esto es lo que te falta)
-    provideHttpClient(withFetch()), 
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptor])
+    ), 
 
     // 3. Inicialización de tu Config.json
     {
