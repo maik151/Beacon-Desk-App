@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./backend
+        working-directory: ./backend/BeaconDeskSolution/
 
     steps:
     - uses: actions/checkout@v4
