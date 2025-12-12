@@ -1,9 +1,10 @@
-﻿using System.Net;
-using System.Text.Json; // Necesitas este namespace para la serialización
+﻿using System; // Necesario para Guid y DateTimeOffset
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Text.Json.Serialization; // Necesario para [JsonIgnore]
 
 namespace BeaconDesk.Application.Dto.Errors
 {
-    // 1. Cambiar a 'public' para que la capa API pueda acceder a ella.
     public class ErrorDetails
     {
         // Propiedad esencial para el código HTTP (400, 404, 500, etc.)
@@ -12,14 +13,30 @@ namespace BeaconDesk.Application.Dto.Errors
         // Mensaje amigable para el usuario (ej: "Ticket no encontrado")
         public string Message { get; set; }
 
+        // =======================================================
+        // PROPIEDADES AÑADIDAS PARA DEPURACIÓN Y SOPORTE
+        // =======================================================
+
+        // ID único para rastrear este error específico en los logs
+        public Guid ErrorId { get; set; } = Guid.NewGuid();
+
+        // Fecha y hora del error (usando UTC/Offset para precisión)
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public DateTimeOffset Timestamp { get; set; }
+
+        // Identificador del usuario que causó el error (ej: email)
+        public string? UserIdentifier { get; set; }
+
+        // =======================================================
+
         // Opcional: Para errores de validación (ej: "El campo Nombre es requerido")
-        public IDictionary<string, string[]> Errors { get; set; }
+        public IDictionary<string, string[]>? Errors { get; set; }
 
         // Método para serializar (convertir) el objeto a una cadena JSON
         public override string ToString()
         {
-            // Usamos System.Text.Json para serializar el objeto a la respuesta HTTP
-            return JsonSerializer.Serialize(this);
+            // Usaremos WriteIndented = true para que el JSON se vea bonito y legible en Swagger/Postman.
+            return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }

@@ -1,35 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq; // Necesario para el método ToArray() si usas FluentValidation
+using System.Linq;
 
 namespace BeaconDesk.Application.Exceptions
 {
-    // 1. Debe ser pública (public) y 2. debe heredar de Exception
     public class ValidationException : Exception
     {
-        // 3. Propiedad para almacenar los errores: Campo (Key) -> Lista de Mensajes (Value)
-        public IDictionary<string, string[]> Errors { get; }
+        // 🚨 CAMBIO 1: La propiedad Errors ahora debe ser 'set' privado o público
+        // La haremos pública para asignar el diccionario completo fácilmente.
+        public IDictionary<string, string[]>? Errors { get; set; } // Permitimos 'set'
 
         // Constructor base
         public ValidationException()
             : base("Uno o más errores de validación ocurrieron.")
         {
-            // Inicializa el diccionario vacío
             Errors = new Dictionary<string, string[]>();
         }
 
-        /* // 4. Constructor común cuando se usa FluentValidation: 
-        // Permite pasar los resultados del validador directamente.
-        public ValidationException(IEnumerable<ValidationFailure> failures) : this()
+        // 🚨 CAMBIO 2: Añadir el constructor para recibir el diccionario de errores
+        // Esto es esencial para que tus servicios puedan lanzar la excepción con los errores
+        public ValidationException(IDictionary<string, string[]> validationErrors)
+            : this() // Llama al constructor base para el mensaje general
         {
-            Errors = failures
-                .GroupBy(e => e.PropertyName, e => e.ErrorMessage)
-                .ToDictionary(failureGroup => failureGroup.Key, 
-                              failureGroup => failureGroup.ToArray());
+            // Asigna los errores de validación pasados
+            Errors = validationErrors;
         }
-        */
 
-        // Versión simple (si no usas FluentValidation)
+        // NOTA: Mantenemos tu constructor simple si lo usas:
         public ValidationException(string message) : base(message)
         {
             Errors = new Dictionary<string, string[]>();

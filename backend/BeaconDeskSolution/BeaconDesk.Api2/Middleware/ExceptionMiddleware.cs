@@ -1,9 +1,9 @@
 ﻿using BeaconDesk.Application.Dto.Errors;
 using BeaconDesk.Application.Exceptions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging; // Importante para el ILogger
+using Microsoft.Extensions.Logging;
 using System;
-using System.Net; // Importante para HttpStatusCode
+using System.Net;
 using System.Threading.Tasks;
 
 namespace BeaconDesk.Api2.Middleware
@@ -11,13 +11,12 @@ namespace BeaconDesk.Api2.Middleware
     public class ExceptionMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionMiddleware> _logger; // Variable para el logger
+        private readonly ILogger<ExceptionMiddleware> _logger;
 
-        // Constructor: Recibe RequestDelegate y el ILogger
         public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
         {
             _next = next;
-            _logger = logger; // CRÍTICO: Asignar el logger inyectado
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext httpContext)
@@ -28,10 +27,9 @@ namespace BeaconDesk.Api2.Middleware
             }
             catch (Exception ex)
             {
-                // CRÍTICO: Loguear el error completo con el stack trace para logs internos
+                // El logueo con ILogger está perfecto y es CRÍTICO para el diagnóstico
                 _logger.LogError(ex, "Ocurrió un error no manejado: {Message}", ex.Message);
 
-                // Formatear y enviar la respuesta limpia al cliente
                 await HandleExceptionAsync(httpContext, ex);
             }
         }
@@ -41,11 +39,16 @@ namespace BeaconDesk.Api2.Middleware
             context.Response.ContentType = "application/json";
             var statusCode = HttpStatusCode.InternalServerError; // Por defecto: 500
 
-            // Inicializa el modelo de error con valores predeterminados (para el error 500)
+            // =======================================================
+            // 🚨 AJUSTE CRÍTICO: Inicializar aquí el ErrorDetails con la hora
+            // para que todos los errores (404, 400, 500) tengan ErrorId y Timestamp.
+            // =======================================================
             var errorDetails = new ErrorDetails
             {
                 StatusCode = (int)statusCode,
-                Message = "Ha ocurrido un error inesperado en el servidor."
+                Message = "Ha ocurrido un error inesperado en el servidor.",
+                Timestamp = DateTimeOffset.UtcNow // Establece la hora del evento
+                // ErrorId se autogenera en la clase ErrorDetails
             };
 
             // Mapeo de Excepciones Personalizadas a Códigos HTTP
@@ -59,17 +62,18 @@ namespace BeaconDesk.Api2.Middleware
                 case ValidationException validationEx:
                     statusCode = HttpStatusCode.BadRequest; // 400
                     errorDetails.Message = validationEx.Message;
-                    // CRÍTICO: Adjuntar los errores de validación
-                    errorDetails.Errors = validationEx.Errors;
+                    errorDetails.Errors = validationEx.Errors; // Adjuntar los errores
                     break;
 
                 default:
                     // Cualquier otro error (BD, NullReference, etc.) se trata como 500.
+                    // El mensaje y el código ya están establecidos por defecto.
                     break;
             }
 
+            // Sincronizar el StatusCode en la respuesta HTTP y en el JSON
             context.Response.StatusCode = (int)statusCode;
-            errorDetails.StatusCode = (int)statusCode; // Sincroniza el código del objeto JSON
+            errorDetails.StatusCode = (int)statusCode;
 
             // Escribe la respuesta JSON en el cuerpo de la respuesta HTTP
             return context.Response.WriteAsync(errorDetails.ToString());

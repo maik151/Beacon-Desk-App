@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 // Aunque el using de Exceptions ya no es necesario aquí, lo mantendremos por si lo usas en otros métodos
-using BeaconDesk.Application.Exceptions;
 
 namespace BeaconDesk.Api2.Controllers
 {
