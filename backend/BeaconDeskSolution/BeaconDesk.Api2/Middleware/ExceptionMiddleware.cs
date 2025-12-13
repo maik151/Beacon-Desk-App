@@ -1,9 +1,12 @@
 ﻿using BeaconDesk.Application.Dto.Errors;
 using BeaconDesk.Application.Exceptions;
+using BeaconDesk.Domain.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net;
+using System.Security.Authentication;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BeaconDesk.Api2.Middleware
@@ -12,11 +15,13 @@ namespace BeaconDesk.Api2.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IHostEnvironment _env;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env  )
         {
             _next = next;
             _logger = logger;
+            _env = env;
         }
 
         public async Task InvokeAsync(HttpContext httpContext)
@@ -34,49 +39,78 @@ namespace BeaconDesk.Api2.Middleware
             }
         }
 
-        private Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            var statusCode = HttpStatusCode.InternalServerError; // Por defecto: 500
 
-            // =======================================================
-            // 🚨 AJUSTE CRÍTICO: Inicializar aquí el ErrorDetails con la hora
-            // para que todos los errores (404, 400, 500) tengan ErrorId y Timestamp.
-            // =======================================================
-            var errorDetails = new ErrorDetails
+            // Valores por defecto (Error 500)
+            var statusCode = HttpStatusCode.InternalServerError;
+            string message = "Ha ocurrido un error inesperado en el servidor."; // Mensaje para el usuario final
+            string detail = exception.Message; // Mensaje técnico para ti (Backend/Dev)
+            object errorsData = null;
+
+
+
+            //Ocultar detalle de error para el entorno de Produccion
+            if (_env.IsDevelopment())
             {
-                StatusCode = (int)statusCode,
-                Message = "Ha ocurrido un error inesperado en el servidor.",
-                Timestamp = DateTimeOffset.UtcNow // Establece la hora del evento
-                // ErrorId se autogenera en la clase ErrorDetails
-            };
+                detail = exception.Message;
+            }
+            else
+            {
+                detail = null;
+            }
 
-            // Mapeo de Excepciones Personalizadas a Códigos HTTP
+
+
             switch (exception)
             {
+                case AuthenticationException authEx:
+                    statusCode = HttpStatusCode.Unauthorized;
+                    message = "No autorizado"; // Título amigable
+                    detail = authEx.Message;   // Ej: "Credenciales inválidas"
+                    break;
+
                 case NotFoundException notFoundEx:
-                    statusCode = HttpStatusCode.NotFound; // 404
-                    errorDetails.Message = notFoundEx.Message;
+                    statusCode = HttpStatusCode.NotFound;
+                    message = "Recurso no encontrado";
+                    detail = notFoundEx.Message; // Ej: "El usuario con ID 5 no existe"
                     break;
 
                 case ValidationException validationEx:
-                    statusCode = HttpStatusCode.BadRequest; // 400
-                    errorDetails.Message = validationEx.Message;
-                    errorDetails.Errors = validationEx.Errors; // Adjuntar los errores
+                    statusCode = HttpStatusCode.BadRequest;
+                    message = "Error de validación";
+                    detail = "Uno o más campos no cumplen los requisitos.";
+                    errorsData = validationEx.Errors; // Los errores específicos van en Data
                     break;
 
                 default:
-                    // Cualquier otro error (BD, NullReference, etc.) se trata como 500.
-                    // El mensaje y el código ya están establecidos por defecto.
+                    // CASO CRÍTICO (500)
+                    // En Producción, por seguridad, NO deberías mostrar 'exception.Message' en 'Detail'
+                    // para no dar pistas a hackers. Pero para desarrollo está bien.
+                    message = "Error Crítico del Sistema";
+                    detail = exception.Message; // Ej: "Connection refused 127.0.0.1..."
                     break;
             }
 
-            // Sincronizar el StatusCode en la respuesta HTTP y en el JSON
             context.Response.StatusCode = (int)statusCode;
-            errorDetails.StatusCode = (int)statusCode;
 
-            // Escribe la respuesta JSON en el cuerpo de la respuesta HTTP
-            return context.Response.WriteAsync(errorDetails.ToString());
+            // Construimos la respuesta usando el constructor de ERROR que hicimos arriba
+            var response = new ApiResponse<object>((int)statusCode, message, detail)
+            {
+                Data = errorsData, // Si hay errores de validación, van aquí
+                CorrelationId = context.TraceIdentifier
+            };
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = true // Opcional: para que se lea bonito en Postman
+            };
+
+            var jsonResponse = JsonSerializer.Serialize(response, jsonOptions);
+
+            await context.Response.WriteAsync(jsonResponse);
         }
     }
 }

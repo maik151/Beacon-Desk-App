@@ -81,6 +81,7 @@ app.UseCors("NewPolicy");
 
 // E. Middleware de Manejo de Excepciones Globales
 app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseSerilogRequestLogging();
 
 // C. Autenticación y Autorización (¡Orden Importante!)
