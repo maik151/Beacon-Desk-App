@@ -6,74 +6,76 @@ using BeaconDesk.Infraestructure.Persistence.Repositories;
 using BeaconDesk.Infraestructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-// IMPORTANTE: Añade el using para poder acceder a tu middleware
-using BeaconDesk.Api2.Middleware;
-using Microsoft.AspNetCore.Builder; // Asegúrate de que este using esté si lo necesitas para métodos de extensión
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-//--------Configuracion de Servicios ------------------
+// ---------------------------------------------------------
+// 1. CONFIGURACIï¿½N DE SERVICIOS (Service Collection)
+// ---------------------------------------------------------
 
-//Configuracion de cadena de conexion
 var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
+
+
 
 //Registar Inyeccion de dependencias del DbContext y demas Servicios
 
 builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
   options.UseSqlServer(connectionString));
 
-// Add services to the container.
-//Registro de Servicios de Autenticacion
+// Servicios de Autenticaciï¿½n
 builder.Services.AddScoped<IUsuarioRepository, ImpUsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, ImpUsuarioService>();
 builder.Services.AddScoped<ITokenServices, TokenService>();
-
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-//Solucion para el tema del CORS
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NewPolicy", app =>
     {
         app.WithOrigins("http://localhost:4200") // <--- La URL exacta de tu Angular
-               .AllowAnyMethod()                     // Permite GET, POST, PUT, DELETE
-               .AllowAnyHeader();                    // Permite enviar Tokens y Content-Type
-    });
+           .AllowAnyMethod()                     // Permite GET, POST, PUT, DELETE
+           .AllowAnyHeader();                    // Permite enviar Tokens y Content-Type
+    });
 });
 
-
+// --- AQUï¿½ SE CONSTRUYE LA APP ---
 var app = builder.Build();
 
-// =======================================================
-// 1. TU MIDDLEWARE DE EXCEPCIONES (DEBE IR PRIMERO)
-// =======================================================
-app.UseMiddleware<ExceptionMiddleware>();
+//Configuacion del Middleware para CORS 
+app.UseHttpsRedirection();
+app.UseCors("NewPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.Run();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(); // UI Clï¿½sica en /swagger
+
+    // UI de Scalar en /scalar/v1
     app.MapScalarApiReference(options =>
     {
         options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
     });
 }
 
-// =======================================================
-// 2. MIDDLEWARES DEL LOGIN/CORS/SEGURIDAD (DEL CÓDIGO DE DEVELOP)
-// =======================================================
 app.UseHttpsRedirection();
-app.UseCors("NewPolicy"); // Debe ir antes de UseAuthorization/UseAuthentication
-app.UseAuthentication();  // Necesario para el Login
-app.UseAuthorization();
-// OJO: Si usas UseAuthentication, también deberás configurarlo en builder.Services (JWT Bearer, etc.), 
-// pero ese código debe estar en la sección de builder.Services.
 
+app.UseAuthorization();
+// OJO: Si usas UseAuthentication, tambiï¿½n deberï¿½s configurarlo en builder.Services (JWT Bearer, etc.), 
+// pero ese cï¿½digo debe estar en la secciï¿½n de builder.Services.
+
+// D. Mapeo de Controladores
 app.MapControllers();
 
+// E. Ejecuciï¿½n (SOLO UNA VEZ AL FINAL)
 app.Run();
