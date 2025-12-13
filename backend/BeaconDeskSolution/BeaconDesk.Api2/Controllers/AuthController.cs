@@ -66,6 +66,19 @@ namespace BeaconDesk.Api2.Controllers
             }
         }
 
-        // ... (resto del controlador)
+        [HttpGet("generate-hash/{password}")]
+        public IActionResult GenerateHash(string password)
+        {
+            // Usamos la misma librería que el servicio de login
+            var hash = BCrypt.Net.BCrypt.HashPassword(password);
+
+            // Devolvemos el hash y un recordatorio
+            return Ok(new
+            {
+                Password = password,
+                Hash = hash,
+                Message = "Copia este HASH y pégalo en la columna 'PasswordHash' de tu usuario admin en la BD."
+            });
+        }
     }
 }

@@ -1,3 +1,4 @@
+using BeaconDesk.Api2.Middleware;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Application.Services.AutenticacionServices;
 using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
@@ -7,11 +8,26 @@ using BeaconDesk.Infraestructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
+using Serilog;
+
+
+
 var builder = WebApplication.CreateBuilder(args);
 
+
+//----------------------------------------
+// CONFIGURACIÓN DE SERILOG
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration) // Lee de appsettings
+    .Enrich.FromLogContext() // <--- ¡NECESARIO para que funcione el CorrelationID!
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) // Archivo diario
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 // ---------------------------------------------------------
-// 1. CONFIGURACIÓN DE SERVICIOS (Service Collection)
-// ---------------------------------------------------------
+// CONFIGURACIÓN DE SERVICIOS (Service Collection)
 
 var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
 
@@ -38,12 +54,12 @@ builder.Services.AddCors(options =>
     });
 });
 
-// --- AQUÍ SE CONSTRUYE LA APP ---
+
+//Inicializador de APP
 var app = builder.Build();
 
 // ---------------------------------------------------------
-// 2. CONFIGURACIÓN DEL MIDDLEWARE (Pipeline HTTP)
-// ---------------------------------------------------------
+// CONFIGURACIÓN DEL MIDDLEWARE (Pipeline HTTP)
 
 // A. Swagger y Scalar (Deben ir PRIMERO en entorno de desarrollo)
 if (app.Environment.IsDevelopment())
@@ -62,6 +78,11 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors("NewPolicy");
 
+
+// E. Middleware de Manejo de Excepciones Globales
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseSerilogRequestLogging();
+
 // C. Autenticación y Autorización (¡Orden Importante!)
 // Primero verificas quién es (Authentication), luego si tiene permiso (Authorization)
 app.UseAuthentication();
@@ -69,6 +90,10 @@ app.UseAuthorization();
 
 // D. Mapeo de Controladores
 app.MapControllers();
+
+
+
+
 
 // E. Ejecución (SOLO UNA VEZ AL FINAL)
 app.Run();
