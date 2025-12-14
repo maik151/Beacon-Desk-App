@@ -34,3 +34,5 @@ TestResults.xml
 *.db
 *.mdf
 *.ldf
+
+logs

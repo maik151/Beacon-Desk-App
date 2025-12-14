@@ -1,74 +1,160 @@
+using BeaconDesk.Api2.Filters;
+using BeaconDesk.Api2.Middleware;
+using BeaconDesk.Application.Dto.AuthenticacionDto;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Application.Services.AutenticacionServices;
 using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
 using BeaconDesk.Infraestructure.Persistence.DbContext;
 using BeaconDesk.Infraestructure.Persistence.Repositories;
 using BeaconDesk.Infraestructure.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Serilog;
+using System.Reflection;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------------------------------------------------------
-// 1. CONFIGURACIÓN DE SERVICIOS (Service Collection)
+// CONFIGURACIÃ“N DE LOGS (Serilog)
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 // ---------------------------------------------------------
-
+// BASE DE DATOS
 var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
-
 builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
         options.UseSqlServer(connectionString));
 
-// Servicios de Autenticación
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        connectionString: connectionString!,
+        name: "BeaconDesk-AzureDatabase", // Nombre que saldrÃ¡ en el reporte
+        timeout: TimeSpan.FromSeconds(3));
+
+// ---------------------------------------------------------
+// CONFIGURACIÃ“N DE VALIDACIÃ“N (FluentValidation)
+builder.Services.AddValidatorsFromAssemblyContaining<BeaconDesk.Application.Validation.LoginRequestValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
+// ---------------------------------------------------------
+// CONTROLADORES Y FILTROS
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<CorrelationIdResultFilter>();
+    options.Filters.Add<ValidationFilter>();
+});
+
+// ---------------------------------------------------------
+// SERVICIOS DE APLICACIÃ“N (InyecciÃ³n de Dependencias)
 builder.Services.AddScoped<IUsuarioRepository, ImpUsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, ImpUsuarioService>();
 builder.Services.AddScoped<ITokenServices, TokenService>();
 
-builder.Services.AddControllers();
+// ---------------------------------------------------------
+// SWAGGER Y DOCUMENTACIÃ“N
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Beacon Desk API",
+        Version = "v1",
+        Description = "DocumentaciÃ³n profesional."
+    });
 
+    
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    var assemblyApplication = Assembly.GetAssembly(typeof(LoginRequestDto));
+    var xmlFilenameApp = $"{assemblyApplication.GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilenameApp));
+});
+
+// ---------------------------------------------------------
 // CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NewPolicy", app =>
     {
         app.WithOrigins("http://localhost:4200")
-           .AllowAnyMethod()
-           .AllowAnyHeader();
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
-// --- AQUÍ SE CONSTRUYE LA APP ---
+// =========================================================
+// CONSTRUCCIÃ“N DE LA APP
 var app = builder.Build();
+// =========================================================
 
 // ---------------------------------------------------------
-// 2. CONFIGURACIÓN DEL MIDDLEWARE (Pipeline HTTP)
-// ---------------------------------------------------------
+// PIPELINE (Middleware)
 
-// A. Swagger y Scalar (Deben ir PRIMERO en entorno de desarrollo)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); // UI Clásica en /swagger
-
-    // UI de Scalar en /scalar/v1
+    app.UseSwaggerUI();
     app.MapScalarApiReference(options =>
     {
         options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
     });
 }
 
-// B. Redirección y CORS
 app.UseHttpsRedirection();
 app.UseCors("NewPolicy");
 
-// C. Autenticación y Autorización (¡Orden Importante!)
-// Primero verificas quién es (Authentication), luego si tiene permiso (Authorization)
+// Middlewares personalizados (Manejo de errores y Logs)
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseSerilogRequestLogging();
+
+// AutenticaciÃ³n
 app.UseAuthentication();
 app.UseAuthorization();
 
-// D. Mapeo de Controladores
+// Mapeo final
 app.MapControllers();
 
-// E. Ejecución (SOLO UNA VEZ AL FINAL)
+//Endpotin de Health
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var response = new
+        {
+            status = report.Status.ToString(), // Healthy, Degraded o Unhealthy
+            checkedAt = DateTime.UtcNow,
+            duration = report.TotalDuration.TotalMilliseconds + " ms",
+            services = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds + " ms"
+            })
+        };
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+    }
+});
+
 app.Run();

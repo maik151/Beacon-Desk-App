@@ -1,4 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
+using System;
+// Aunque el using de Exceptions ya no es necesario aquí, lo mantendremos por si lo usas en otros métodos
 
 namespace BeaconDesk.Api2.Controllers
 {
@@ -21,6 +25,9 @@ namespace BeaconDesk.Api2.Controllers
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
+            // 🚨 CÓDIGO CORREGIDO Y RESTAURADO 🚨
+            // La línea 'throw new NotFoundException("Ticket", 100);' ha sido ELIMINADA.
+
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),

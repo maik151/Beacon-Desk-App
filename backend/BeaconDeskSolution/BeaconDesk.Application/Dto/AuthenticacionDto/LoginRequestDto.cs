@@ -1,15 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BeaconDesk.Application.Dto.AuthenticacionDto
 {
+    /// <summary>
+    /// Datos requeridos para iniciar sesión en el sistema.
+    /// </summary>
     public class LoginRequestDto
     {
-        public string? Email { get; set; }
-        public string? Password { get; set; }
+        /// <summary>
+        /// Correo electrónico corporativo del usuario.
+        /// </summary>
+        /// <example>usuario@empresa.com</example>
+        public string Email { get; set; }
 
+        /// <summary>
+        /// Contraseña del usuario. Debe cumplir con las políticas de seguridad (mínimo 8 caracteres).
+        /// </summary>
+        /// <example>P@ssw0rd123!</example>
+        public string Password { get; set; }
     }
 }
