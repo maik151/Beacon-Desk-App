@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-namespace BeaconDesk.Api2.Middleware
+namespace BeaconDesk.Api2.Filters
 {
 
     public class CorrelationIdResultFilter : IResultFilter

@@ -1,3 +1,4 @@
+using BeaconDesk.Api2.Filters;
 using BeaconDesk.Api2.Middleware;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Application.Services.AutenticacionServices;
@@ -5,96 +6,104 @@ using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
 using BeaconDesk.Infraestructure.Persistence.DbContext;
 using BeaconDesk.Infraestructure.Persistence.Repositories;
 using BeaconDesk.Infraestructure.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
-
 using Serilog;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-//----------------------------------------
-// CONFIGURACIÓN DE SERILOG
+// ---------------------------------------------------------
+// CONFIGURACIÓN DE LOGS (Serilog)
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration) // Lee de appsettings
-    .Enrich.FromLogContext() // <--- ¡NECESARIO para que funcione el CorrelationID!
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) // Archivo diario
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
 // ---------------------------------------------------------
-// CONFIGURACIÓN DE SERVICIOS (Service Collection)
-
+// BASE DE DATOS
 var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
-
 builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
         options.UseSqlServer(connectionString));
 
-// Servicios de Autenticación
+// ---------------------------------------------------------
+// CONFIGURACIÓN DE VALIDACIÓN (FluentValidation)
+builder.Services.AddValidatorsFromAssemblyContaining<BeaconDesk.Application.Validation.LoginRequestValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
+// ---------------------------------------------------------
+// CONTROLADORES Y FILTROS
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<CorrelationIdResultFilter>();
+    options.Filters.Add<ValidationFilter>();
+});
+
+// ---------------------------------------------------------
+// SERVICIOS DE APLICACIÓN (Inyección de Dependencias)
 builder.Services.AddScoped<IUsuarioRepository, ImpUsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, ImpUsuarioService>();
 builder.Services.AddScoped<ITokenServices, TokenService>();
-builder.Services.AddControllers(opt => opt.Filters.Add<CorrelationIdResultFilter>());
-builder.Services.AddControllers();
+
+// ---------------------------------------------------------
+// SWAGGER Y DOCUMENTACIÓN
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// ---------------------------------------------------------
 // CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NewPolicy", app =>
     {
         app.WithOrigins("http://localhost:4200")
-           .AllowAnyMethod()
-           .AllowAnyHeader();
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
-
-//Inicializador de APP
+// =========================================================
+// CONSTRUCCIÓN DE LA APP
 var app = builder.Build();
+// =========================================================
 
 // ---------------------------------------------------------
-// CONFIGURACIÓN DEL MIDDLEWARE (Pipeline HTTP)
+// PIPELINE (Middleware)
 
-// A. Swagger y Scalar (Deben ir PRIMERO en entorno de desarrollo)
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); // UI Clásica en /swagger
-
-    // UI de Scalar en /scalar/v1
+    app.UseSwaggerUI();
     app.MapScalarApiReference(options =>
     {
         options.WithOpenApiRoutePattern("/swagger/v1/swagger.json");
     });
 }
 
-// B. Redirección y CORS
 app.UseHttpsRedirection();
 app.UseCors("NewPolicy");
 
-
-// E. Middleware de Manejo de Excepciones Globales
+// Middlewares personalizados (Manejo de errores y Logs)
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseSerilogRequestLogging();
 
-// C. Autenticación y Autorización (¡Orden Importante!)
-// Primero verificas quién es (Authentication), luego si tiene permiso (Authorization)
+// Autenticación
 app.UseAuthentication();
 app.UseAuthorization();
 
-// D. Mapeo de Controladores
+// Mapeo final
 app.MapControllers();
 
-
-
-
-
-// E. Ejecución (SOLO UNA VEZ AL FINAL)
 app.Run();
