@@ -1,12 +1,12 @@
 ﻿using BeaconDesk.Application.Dto.AuthenticacionDto;
-using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Authentication;
 // **********************************************
 using BeaconDesk.Application.Dto.Errors; // 🚨 AÑADIR ESTE USING
-using System;
+using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Domain.Common; // Necesario para DateTimeOffset
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Security.Authentication;
 // **********************************************
 
 namespace BeaconDesk.Api2.Controllers
@@ -23,27 +23,31 @@ namespace BeaconDesk.Api2.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<ApiResponse<string>>> Login([FromBody] LoginRequestDto loginRequest)
+        public async Task<ActionResult> Login([FromBody] LoginRequestDto loginRequest)
         {
-                var token = await _usuarioService.LoginAsync(loginRequest);
-                var response = new ApiResponse<string>(token, "Login exitoso");
-                response.CorrelationId = HttpContext.TraceIdentifier;
-                return Ok(response);
+            var data = await _usuarioService.LoginAsync(loginRequest);
+
+            var response = new ApiResponse<LoginResponseDto>(data, "Login Exitoso");
+            response.CorrelationId = HttpContext.TraceIdentifier;
+
+            return StatusCode(response.StatusCode, response);
         }
+
+
 
         [HttpGet("generate-hash/{password}")]
         public IActionResult GenerateHash(string password)
         {
             // Usamos la misma librería que el servicio de login
             var hash = BCrypt.Net.BCrypt.HashPassword(password);
+            
+            var data = new { hash = hash};
 
-            // Devolvemos el hash y un recordatorio
-            return Ok(new
-            {
-                Password = password,
-                Hash = hash,
-                Message = "Copia este HASH y pégalo en la columna 'PasswordHash' de tu usuario admin en la BD."
-            });
+            var response = new ApiResponse<object>(data, "Hash Correcto");
+            response.CorrelationId = HttpContext.TraceIdentifier;
+            return StatusCode(response.StatusCode, response);
+
+           
         }
     }
 }

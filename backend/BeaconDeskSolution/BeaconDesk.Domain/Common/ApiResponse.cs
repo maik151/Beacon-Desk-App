@@ -25,15 +25,7 @@ namespace BeaconDesk.Domain.Common
             Success = true;
             Message = message ?? "Operación exitosa";
             Data = data;
-            Detail = null; // Regla: En éxito, no hay detalle de error
-        }
-
-        // Constructor para respuestas exitosas
-        public ApiResponse(T data, string message = null)
-        {
-            Success = true;
-            Message = message ?? "Operación exitosa"; // Mensaje por defecto
-            Data = data;
+            Detail = null;
         }
 
         public ApiResponse(int statusCode, string message, string detail = null)
@@ -41,7 +33,7 @@ namespace BeaconDesk.Domain.Common
             StatusCode = statusCode;
             Success = false;
             Message = message;
-            Detail = detail; // Aquí guardamos la excepción real
+            Detail = detail; 
         }
 
 

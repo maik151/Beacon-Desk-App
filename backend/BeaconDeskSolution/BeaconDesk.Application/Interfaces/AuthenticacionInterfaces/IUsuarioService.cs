@@ -9,7 +9,7 @@ namespace BeaconDesk.Application.Interfaces.AuthenticacionInterfaces
 {
     public interface IUsuarioService
     {
-        Task<String> LoginAsync(LoginRequestDto loginrequest);
+        Task<LoginResponseDto> LoginAsync(LoginRequestDto loginrequest);
 
     }
 }

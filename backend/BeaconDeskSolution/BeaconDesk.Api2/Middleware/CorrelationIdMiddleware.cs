@@ -23,8 +23,12 @@ namespace BeaconDesk.Api2.Middleware
             }
 
             // Devolvemos el ID de correlación en la respuesta
-            context.Response.Headers.TryAdd(_correlationIdHeader, correlationId);
+            context.TraceIdentifier = correlationId;
 
+            if (!context.Response.Headers.ContainsKey(_correlationIdHeader))
+            {
+                context.Response.Headers.Add(_correlationIdHeader, correlationId);
+            }
 
             //Agregamos el ID de correlación al contexto de Serilog
             using (LogContext.PushProperty("CorrelationId", correlationId))

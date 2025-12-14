@@ -38,7 +38,7 @@ builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
 builder.Services.AddScoped<IUsuarioRepository, ImpUsuarioRepository>();
 builder.Services.AddScoped<IUsuarioService, ImpUsuarioService>();
 builder.Services.AddScoped<ITokenServices, TokenService>();
-
+builder.Services.AddControllers(opt => opt.Filters.Add<CorrelationIdResultFilter>());
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

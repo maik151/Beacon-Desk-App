@@ -22,10 +22,8 @@ namespace BeaconDesk.Application.Services.AutenticacionServices
         }
 
 
-        public async Task<string> LoginAsync(LoginRequestDto loginrequest)
+        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto loginrequest)
         {
-            // Opcional: Loguear que alguien está intentando entrar (Auditoría)
-            // Usamos {Email} para que sea buscable en los logs
             _logger.LogInformation("Iniciando intento de login para el correo: {Email}", loginrequest.Email);
 
             try
@@ -53,9 +51,10 @@ namespace BeaconDesk.Application.Services.AutenticacionServices
                 }
 
                 var token = _tokenService.GenerateToken(usuario);
+                var data = new LoginResponseDto { Token = token};
                 _logger.LogInformation("Login exitoso. Token generado para el usuario {UserId}.", usuario.UsuarioID);
 
-                return token;
+                return data;
             }
             catch (AuthenticationException)
             {
