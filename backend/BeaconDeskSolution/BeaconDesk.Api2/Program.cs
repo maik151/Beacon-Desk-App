@@ -1,5 +1,6 @@
 using BeaconDesk.Api2.Filters;
 using BeaconDesk.Api2.Middleware;
+using BeaconDesk.Application.Dto.AuthenticacionDto;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Application.Services.AutenticacionServices;
 using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
+using System.Reflection;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,7 +69,22 @@ builder.Services.AddScoped<ITokenServices, TokenService>();
 // ---------------------------------------------------------
 // SWAGGER Y DOCUMENTACIÓN
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Beacon Desk API",
+        Version = "v1",
+        Description = "Documentación profesional."
+    });
+
+    
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    var assemblyApplication = Assembly.GetAssembly(typeof(LoginRequestDto));
+    var xmlFilenameApp = $"{assemblyApplication.GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilenameApp));
+});
 
 // ---------------------------------------------------------
 // CORS
