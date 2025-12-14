@@ -35,4 +35,5 @@ TestResults.xml
 *.mdf
 *.ldf
 
-logs
+# Logs y Archivos de Auditoria (Serilog, etc.)
+logs/
