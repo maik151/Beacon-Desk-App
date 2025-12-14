@@ -8,10 +8,12 @@ using BeaconDesk.Infraestructure.Persistence.Repositories;
 using BeaconDesk.Infraestructure.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,12 @@ builder.Host.UseSerilog();
 var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
 builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
         options.UseSqlServer(connectionString));
+
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        connectionString: connectionString!,
+        name: "BeaconDesk-AzureDatabase", // Nombre que saldrá en el reporte
+        timeout: TimeSpan.FromSeconds(3));
 
 // ---------------------------------------------------------
 // CONFIGURACIÓN DE VALIDACIÓN (FluentValidation)
@@ -105,5 +113,31 @@ app.UseAuthorization();
 
 // Mapeo final
 app.MapControllers();
+
+//Endpotin de Health
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+
+        var response = new
+        {
+            status = report.Status.ToString(), // Healthy, Degraded o Unhealthy
+            checkedAt = DateTime.UtcNow,
+            duration = report.TotalDuration.TotalMilliseconds + " ms",
+            services = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds + " ms"
+            })
+        };
+
+        await context.Response.WriteAsync(JsonSerializer.Serialize(response));
+    }
+});
 
 app.Run();
