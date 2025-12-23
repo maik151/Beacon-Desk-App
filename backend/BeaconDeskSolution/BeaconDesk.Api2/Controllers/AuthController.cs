@@ -41,6 +41,16 @@ namespace BeaconDesk.Api2.Controllers
         public async Task<ActionResult> Login([FromBody] LoginRequestDto loginRequest)
         {
             var data = await _usuarioService.LoginAsync(loginRequest);
+            // 🚨 REQUERIMIENTO RNF-SEG-06: Configuración de la Cookie HttpOnly
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,                           // Protege contra XSS (JavaScript no puede leerla)
+                Secure = true,                             // Obligatorio para SameSite=None (usa HTTPS)
+                SameSite = SameSiteMode.None,              // Permite que el navegador la guarde en desarrollo (localhost)
+                Expires = DateTime.UtcNow.AddHours(1)      // Tiempo de vida de la sesión
+            };
+            //enviar la cookie al cliente
+            Response.Cookies.Append("X-Access-Token", data.Token, cookieOptions);
 
             var response = new ApiResponse<LoginResponseDto>(data, "Login Exitoso");
 

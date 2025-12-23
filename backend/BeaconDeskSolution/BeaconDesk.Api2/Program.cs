@@ -16,7 +16,9 @@ using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
 using System.Text.Json;
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------------------------------------------------------
@@ -94,14 +96,48 @@ builder.Services.AddCors(options =>
     {
         app.WithOrigins("http://localhost:4200")
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // Permite que el navegador guarde la cookie
     });
 });
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+    };
 
+    // 🚨 REQUERIMIENTO RNF-SEG-06: Leer token desde Cookie HttpOnly
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // Buscamos la cookie que configuramos en el AuthController
+            var token = context.Request.Cookies["X-Access-Token"];
+            if (!string.IsNullOrEmpty(token))
+            {
+                context.Token = token;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
 // =========================================================
 // CONSTRUCCIÓN DE LA APP
 var app = builder.Build();
 // =========================================================
+app.UseMiddleware<ExceptionMiddleware>();
 
 // ---------------------------------------------------------
 // PIPELINE (Middleware)
@@ -121,7 +157,6 @@ app.UseCors("NewPolicy");
 
 // Middlewares personalizados (Manejo de errores y Logs)
 app.UseMiddleware<CorrelationIdMiddleware>();
-app.UseMiddleware<ExceptionMiddleware>();
 app.UseSerilogRequestLogging();
 
 // Autenticación
