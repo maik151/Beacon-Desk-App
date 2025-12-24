@@ -1,0 +1,81 @@
+/* --- 1. Carga de Fuentes Locales (Optimizado) --- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100; /* Regular */
+  font-display: swap; /* Importante para LCP: Muestra texto rápido */
+  src: url('/assets/font/inter-all-100-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 200; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-200-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-300-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-400-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 300; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-300-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-500-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-600-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-700-normal.woff') format('woff');
+}
+
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-800-normal.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900; 
+  font-display: swap;
+  src: url('/assets/font/inter-all-900-normal.woff') format('woff');
+}

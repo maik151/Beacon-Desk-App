@@ -1,27 +1,35 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/**/*.{html,ts}", // Esto le dice a Tailwind que busque clases en tus HTML y TS
+    "./src/**/*.{html,ts}",
   ],
+  darkMode: 'class', // Importante para controlar el tema manualmente
   theme: {
     extend: {
-      colors: {
-        // Aquí definimos tus colores personalizados (basados en tu idea de Figma)
-        primary: {
-          DEFAULT: '#2563EB', 
-          hover: '#1D4ED8',
-          content: '#FFFFFF'
-        },
-        secondary: {
-          DEFAULT: '#64748B', 
-          hover: '#475569',
-          content: '#FFFFFF'
-        },
-        danger: {
-          DEFAULT: '#EF4444',
-          hover: '#DC2626',
-        }
+      // Aquí conectamos Tailwind con tus fuentes locales
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      // Aquí conectamos Tailwind con tus Variables CSS
+      colors: {
+        primary: {
+          DEFAULT: 'var(--primary-color)',
+          hover: 'var(--primary-hover)',
+        },
+        surface: {
+          DEFAULT: 'var(--bg-page)', // bg-surface
+          input: 'var(--bg-input)',  // bg-surface-input
+        },
+        border: {
+          DEFAULT: 'var(--border-input)',
+        },
+        text: {
+          main: 'var(--text-main)',
+          secondary: 'var(--text-secondary)',
+          inverse: 'var(--text-inverse)',
+        },
+        error: 'var(--error-color)',
+      }
     },
   },
   plugins: [],
