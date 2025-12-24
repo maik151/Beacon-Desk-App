@@ -8,11 +8,12 @@ import { ThemeService } from '../../../../core/services/theme.service';
 import { LoginFormComponent } from '../../components/login-form/login-form.component';
 import { LoginRequest } from '../../../../data/interfaces/auth.interface';
 import { ProblemDetails } from '../../../../data/interfaces/api-response.interface';
+import {LogoComponent} from '../../../../shared/components/ui/logo/logo/logo';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, LoginFormComponent],
+  imports: [CommonModule, NgOptimizedImage, LoginFormComponent, LogoComponent],
   templateUrl: './login-page.component.html'
 })
 export class LoginPageComponent {
