@@ -10,7 +10,7 @@ export interface LoginResponseData {
 export interface UserTokenPayload{
   nameId: string;
   unique_name: string;
-  role: string[];
+  role: string;
   nbf: number;
   exp: number;
   iat: number;

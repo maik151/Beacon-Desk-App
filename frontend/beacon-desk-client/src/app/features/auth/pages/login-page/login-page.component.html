@@ -1,0 +1,54 @@
+<div class="grid min-h-screen grid-cols-1 lg:grid-cols-2 bg-surface transition-colors duration-300">
+  
+  <section class="flex flex-col justify-center items-center p-6 lg:p-12 relative">
+    <div class="w-full max-w-[400px]">
+      
+      <div class="flex justify-between items-start mb-8">
+        <div>
+           <img src="assets/logo-beacon.svg" alt="Beacon Desk" class="h-9 mb-6">
+           <h1 class="text-3xl font-bold text-text-main mb-2">Bienvenido de Vuelta!</h1>
+           <p class="text-text-secondary">Qué bien que estás de regreso.</p>
+        </div>
+        <button (click)="themeService.toggleTheme()" class="text-text-secondary hover:text-primary transition-colors p-1">
+          <span class="material-symbols-outlined">{{ themeService.isDarkMode() ? 'light_mode' : 'dark_mode' }}</span>
+        </button>
+      </div>
+
+      <div class="flex gap-6 border-b border-border mb-8">
+        <button class="pb-2.5 border-b-2 border-primary text-primary font-semibold text-sm">Ingresar</button>
+        <button class="pb-2.5 border-b-2 border-transparent text-text-secondary hover:text-text-main font-medium text-sm transition-colors">Regístrate</button>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="flex items-center gap-3 p-4 mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-fade-in">
+          <span class="material-symbols-outlined text-error">error</span>
+          <p class="text-sm text-error font-medium">{{ errorMessage() }}</p>
+        </div>
+      }
+
+      <app-login-form 
+        [isLoading]="isLoading()" 
+        (onSubmit)="handleLogin($event)"
+      ></app-login-form>
+
+      <div class="mt-8 pt-6 border-t border-border">
+        <p class="text-center text-sm text-text-secondary mb-4">O Continua con:</p>
+        <button class="w-full flex justify-center items-center py-2.5 border border-border rounded-lg hover:bg-surface-input transition-colors bg-surface">
+           <img src="assets/icons/google-g.svg" alt="Google" class="w-5 h-5 mr-2">
+           <span class="text-sm font-medium text-text-main">Google</span>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <aside class="hidden lg:flex relative items-center justify-center bg-gradient-to-br from-[#0B1A2E] to-[#050C16] overflow-hidden">
+    <img 
+      [ngSrc]="themeService.isDarkMode() ? 'assets/images/lighthouse-dark.webp' : 'assets/images/lighthouse-light.webp'" 
+      width="900" 
+      height="1000" 
+      priority
+      class="object-contain max-w-[80%] drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)] animate-float"
+    >
+  </aside>
+</div>

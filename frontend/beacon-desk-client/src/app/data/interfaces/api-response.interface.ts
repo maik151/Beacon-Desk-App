@@ -1,6 +1,6 @@
 
 //Clase con la estructura de exito de las respuestas de la API
-export interface ApiRepsonse<T>{
+export interface ApiResponse<T>{
     statusCode: number;
     success: boolean;
     message: string;

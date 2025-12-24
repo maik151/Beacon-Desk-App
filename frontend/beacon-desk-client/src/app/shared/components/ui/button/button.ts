@@ -27,7 +27,7 @@ import { CommonModule } from '@angular/common';
 })
 
 
-export class Button {
+export class ButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() variant: 'primary' | 'outline' | 'ghost' = 'primary';
   @Input() disabled = false;
