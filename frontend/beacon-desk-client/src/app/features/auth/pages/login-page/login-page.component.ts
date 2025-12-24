@@ -13,7 +13,7 @@ import {LogoComponent} from '../../../../shared/components/ui/logo/logo/logo';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, LoginFormComponent, LogoComponent],
+  imports: [CommonModule, LoginFormComponent, LogoComponent],
   templateUrl: './login-page.component.html'
 })
 export class LoginPageComponent {

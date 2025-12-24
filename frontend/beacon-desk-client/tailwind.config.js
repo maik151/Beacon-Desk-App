@@ -7,6 +7,10 @@ module.exports = {
   theme: {
     extend: {
       // Aquí conectamos Tailwind con tus fuentes locales
+      backgroundImage: {
+        // Reemplaza 'nombre-de-tu-archivo.webp' con el nombre real
+        'login-wallpaper': "url('/assets/images/1x/BeaconFont.webp')",
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
