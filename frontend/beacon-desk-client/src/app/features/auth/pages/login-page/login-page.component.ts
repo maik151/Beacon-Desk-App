@@ -1,61 +1,51 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+
+import { AuthService } from '../../../../core/auth/services/auth.service';
+import { ThemeService } from '../../../../core/services/theme.service';
 import { LoginFormComponent } from '../../components/login-form/login-form.component';
-import { AuthService } from '@core/services/auth.service';
-import { LoginRequest } from '@data/interfaces/auth.interface';
+import { LoginRequest } from '../../../../data/interfaces/auth.interface';
+import { ProblemDetails } from '../../../../data/interfaces/api-response.interface';
+import {LogoComponent} from '../../../../shared/components/ui/logo/logo/logo';
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, LoginFormComponent],
-  template: `
-    <div class="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          BeaconDesk
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-          Accede a tu cuenta
-        </p>
-      </div>
-
-      <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          
-          <app-login-form 
-            [isLoading]="isLoading"
-            [errorMessage]="error"
-            (login)="handleLogin($event)">
-          </app-login-form>
-
-        </div>
-      </div>
-    </div>
-  `
+  imports: [CommonModule, LoginFormComponent, LogoComponent],
+  templateUrl: './login-page.component.html'
 })
 export class LoginPageComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  public themeService = inject(ThemeService);
 
-  isLoading = false;
-  error: string | null = null;
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
 
   handleLogin(credentials: LoginRequest) {
-    this.isLoading = true;
-    this.error = null;
+    this.isLoading.set(true);
+    this.errorMessage.set(null); // Limpiar errores previos
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
-        console.log('Login Exitoso:', response);
-        localStorage.setItem('token', response.token); // Guardado básico temporal
-        this.isLoading = false;
-        // this.router.navigate(['/dashboard']); // Descomentar cuando exista
+        // El servicio ya guarda el token y el usuario en el signal
+        this.isLoading.set(false);
+        // Toast de éxito opcional: console.log(response.message);
+        this.router.navigate(['/dashboard']);
       },
-      error: (err) => {
-        console.error(err);
-        this.error = 'Credenciales inválidas o error de servidor';
-        this.isLoading = false;
+      error: (err: HttpErrorResponse) => {
+        this.isLoading.set(false);
+        
+        // Manejo del Error Estándar (RFC 7807)
+        if (err.error) {
+          const problem = err.error as ProblemDetails;
+          // Mostramos 'detail' ("Credenciales inválidas") o un fallback
+          this.errorMessage.set(problem.detail || 'Ocurrió un error inesperado');
+        } else {
+          this.errorMessage.set('Error de conexión con el servidor');
+        }
       }
     });
   }
