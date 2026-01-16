@@ -37,3 +37,4 @@ TestResults.xml
 
 # Logs y Archivos de Auditoria (Serilog, etc.)
 logs/
+Migrations/
