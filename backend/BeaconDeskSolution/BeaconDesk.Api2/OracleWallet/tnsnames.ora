@@ -1,0 +1,12 @@
+oracledatabasemj_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gd9d186350dc70d_oracledatabasemj_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+oracledatabasemj_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gd9d186350dc70d_oracledatabasemj_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+oracledatabasemj_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gd9d186350dc70d_oracledatabasemj_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+oracledatabasemj_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gd9d186350dc70d_oracledatabasemj_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+oracledatabasemj_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.us-phoenix-1.oraclecloud.com))(connect_data=(service_name=gd9d186350dc70d_oracledatabasemj_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+

@@ -4,6 +4,7 @@ using BeaconDesk.Application.Dto.AuthenticacionDto;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Application.Services.AutenticacionServices;
 using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
+using BeaconDesk.Infraestructure;
 using BeaconDesk.Infraestructure.Persistence.DbContext;
 using BeaconDesk.Infraestructure.Persistence.Repositories;
 using BeaconDesk.Infraestructure.Services;
@@ -32,15 +33,21 @@ builder.Host.UseSerilog();
 
 // ---------------------------------------------------------
 // BASE DE DATOS
-var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
-builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
-        options.UseSqlServer(connectionString));
+
+//var connectionString = builder.Configuration.GetConnectionString("BeaconDesk-AzureDatabase");
+//builder.Services.AddDbContext<BeaconDeskDbContext>(options =>
+//        options.UseSqlServer(connectionString));
+
+builder.Services.AddInfrastructure(builder.Configuration);
+
 
 builder.Services.AddHealthChecks()
-    .AddSqlServer(
-        connectionString: connectionString!,
-        name: "BeaconDesk-AzureDatabase", // Nombre que saldrá en el reporte
-        timeout: TimeSpan.FromSeconds(3));
+    .AddDbContextCheck<BeaconDeskDbContext>(
+        name: "Oracle-Database-Check",
+        // timeout: TimeSpan.FromSeconds(3), // <--- ESTA LINEA DEBES BORRARLA, NO EXISTE EN ESTE MÉTODO
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, // Opcional: Define qué pasa si falla
+        tags: new[] { "db", "oracle" } // Opcional: Para agrupar checks
+    );
 
 // ---------------------------------------------------------
 // CONFIGURACIÓN DE VALIDACIÓN (FluentValidation)
@@ -134,20 +141,22 @@ app.MapControllers();
 //Endpotin de Health
 app.MapHealthChecks("/health", new HealthCheckOptions
 {
-    
     ResponseWriter = async (context, report) =>
     {
         context.Response.ContentType = "application/json";
 
         var response = new
         {
-            status = report.Status.ToString(), // Healthy, Degraded o Unhealthy
+            status = report.Status.ToString(),
             checkedAt = DateTime.UtcNow,
             duration = report.TotalDuration.TotalMilliseconds + " ms",
             services = report.Entries.Select(e => new
             {
                 name = e.Key,
                 status = e.Value.Status.ToString(),
+                // AGREGA ESTA LÍNEA PARA VER EL MENSAJE DE ORACLE:
+                error = e.Value.Exception?.Message,
+
                 description = e.Value.Description,
                 duration = e.Value.Duration.TotalMilliseconds + " ms"
             })
