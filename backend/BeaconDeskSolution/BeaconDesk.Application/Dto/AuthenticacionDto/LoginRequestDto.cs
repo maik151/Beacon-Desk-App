@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace BeaconDesk.Application.Dto.AuthenticacionDto
+﻿namespace BeaconDesk.Application.Dto.AuthenticacionDto
 {
     /// <summary>
     /// Datos requeridos para iniciar sesión en el sistema.

@@ -1,14 +1,8 @@
-﻿using BeaconDesk.Application.Dto.Errors;
-using BeaconDesk.Application.Exceptions;
-using BeaconDesk.Domain.Common;
-using Microsoft.AspNetCore.Http;
+﻿using BeaconDesk.Application.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
 using System.Net;
 using System.Security.Authentication;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace BeaconDesk.Api2.Middleware
 {
@@ -18,7 +12,7 @@ namespace BeaconDesk.Api2.Middleware
         private readonly ILogger<ExceptionMiddleware> _logger;
         private readonly IHostEnvironment _env;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env  )
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
         {
             _next = next;
             _logger = logger;
@@ -47,9 +41,9 @@ namespace BeaconDesk.Api2.Middleware
 
             var problemDetails = new ProblemDetails
             {
-                Instance = context.Request.Path, 
-                Status = (int)statusCode,        
-                Title = "Ocurrió un error inesperado", 
+                Instance = context.Request.Path,
+                Status = (int)statusCode,
+                Title = "Ocurrió un error inesperado",
                 Detail = _env.IsDevelopment() ? exception.Message : "Consulte los logs para más detalles."
             };
 

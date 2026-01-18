@@ -1,5 +1,4 @@
 ﻿using BeaconDesk.Application.Dto.AuthenticacionDto;
-using BeaconDesk.Application.Dto.Errors;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Domain.Common;
 using Microsoft.AspNetCore.Mvc;

@@ -2,12 +2,12 @@
 using BeaconDesk.Application.Dto.AuthenticacionDto;
 using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
 using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
-using System.Security.Authentication;
 using Microsoft.Extensions.Logging;
+using System.Security.Authentication;
 
 namespace BeaconDesk.Application.Services.AutenticacionServices
 {
-    public class ImpUsuarioService:IUsuarioService
+    public class ImpUsuarioService : IUsuarioService
     {
         private readonly IUsuarioRepository _usuarioRepository;
         private readonly ITokenServices _tokenService;
@@ -51,19 +51,19 @@ namespace BeaconDesk.Application.Services.AutenticacionServices
                 }
 
                 var token = _tokenService.GenerateToken(usuario);
-                var data = new LoginResponseDto { Token = token};
+                var data = new LoginResponseDto { Token = token };
                 _logger.LogInformation("Login exitoso. Token generado para el usuario {UserId}.", usuario.UsuarioID);
 
                 return data;
             }
             catch (AuthenticationException)
             {
-                
+
                 throw;
             }
             catch (Exception ex)
             {
-               
+
                 _logger.LogError(ex, "Error crítico no controlado durante el login de {Email}", loginrequest.Email);
 
                 throw new ApplicationException("Ocurrió un error inesperado en el servidor.", ex);

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BeaconDesk.Infraestructure.Persistence.DbContext
 {
-    public  class BeaconDeskDbContext : Microsoft.EntityFrameworkCore.DbContext
+    public class BeaconDeskDbContext : Microsoft.EntityFrameworkCore.DbContext
     {
 
         public BeaconDeskDbContext(DbContextOptions<BeaconDeskDbContext> options) : base(options)
@@ -16,7 +16,7 @@ namespace BeaconDesk.Infraestructure.Persistence.DbContext
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
-        public DbSet<Equipo> Equipos{ get; set; }
+        public DbSet<Equipo> Equipos { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -39,7 +39,7 @@ namespace BeaconDesk.Infraestructure.Persistence.DbContext
                 new Rol { RolID = 3, Nombre = "Usuario" }
             );
 
-            
+
             modelBuilder.Entity<Equipo>().HasData(
                 new Equipo { EquipoID = 1, Nombre = "Desarrollo" },
                 new Equipo { EquipoID = 2, Nombre = "QA" },

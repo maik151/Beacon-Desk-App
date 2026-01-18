@@ -1,6 +1,4 @@
-﻿using System; // Necesario para Guid y DateTimeOffset
-using System.Collections.Generic;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization; // Necesario para [JsonIgnore]
 
 namespace BeaconDesk.Application.Dto.Errors

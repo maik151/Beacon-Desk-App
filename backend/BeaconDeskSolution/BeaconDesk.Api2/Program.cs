@@ -12,7 +12,6 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
@@ -85,7 +84,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Documentación profesional."
     });
 
-    
+
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     var assemblyApplication = Assembly.GetAssembly(typeof(LoginRequestDto));

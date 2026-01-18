@@ -1,6 +1,4 @@
-﻿using System; // Es fundamental para heredar de Exception
-
-namespace BeaconDesk.Application.Exceptions
+﻿namespace BeaconDesk.Application.Exceptions
 {
     // 1. Debe ser pública (public) y 2. debe heredar de Exception
     public class NotFoundException : Exception

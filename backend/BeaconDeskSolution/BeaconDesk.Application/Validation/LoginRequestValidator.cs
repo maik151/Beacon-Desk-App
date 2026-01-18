@@ -1,16 +1,12 @@
 ﻿using BeaconDesk.Application.Dto.AuthenticacionDto;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BeaconDesk.Application.Validation
 {
-    public  class LoginRequestValidator : AbstractValidator<LoginRequestDto>
+    public class LoginRequestValidator : AbstractValidator<LoginRequestDto>
     {
-        public LoginRequestValidator() { 
+        public LoginRequestValidator()
+        {
             //Regla de Validacion de Email
 
             RuleFor(x => x.Email)

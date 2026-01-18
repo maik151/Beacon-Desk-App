@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace BeaconDesk.Application.Exceptions
+﻿namespace BeaconDesk.Application.Exceptions
 {
     public class ValidationException : Exception
     {

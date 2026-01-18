@@ -13,12 +13,14 @@ namespace BeaconDesk.Api2.Middleware
         }
 
 
-        public async Task Invoke(HttpContext context) { 
+        public async Task Invoke(HttpContext context)
+        {
             //Obtenemos el ID de corraltion
             string correlationId = context.Request.Headers[_correlationIdHeader].FirstOrDefault()!;
 
             //Si este id no existe creamos un ID nuevo
-            if (string.IsNullOrEmpty(correlationId)) {
+            if (string.IsNullOrEmpty(correlationId))
+            {
                 correlationId = Guid.NewGuid().ToString();
             }
 

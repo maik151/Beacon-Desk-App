@@ -1,20 +1,15 @@
 ﻿using BeaconDesk.Application.Interfaces.AuthenticacionInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BeaconDesk.Application.Interfaces;
 using BeaconDesk.Domain.AunthenticacionModule.Entities;
 using Microsoft.Extensions.Configuration; // Para leer appsettings
 using Microsoft.IdentityModel.Tokens;   // Para la llave
 using System.IdentityModel.Tokens.Jwt;  // Para el Handler
 using System.Security.Claims;           // Para los Claims
+using System.Text;
 
 
 namespace BeaconDesk.Infraestructure.Services
 {
-    public class TokenService:ITokenServices
+    public class TokenService : ITokenServices
     {
         private readonly SymmetricSecurityKey _key;
         private readonly string _issuer;
@@ -25,7 +20,8 @@ namespace BeaconDesk.Infraestructure.Services
             _issuer = config["JwtSettings:Issuer"]!;
         }
 
-        public string GenerateToken(Usuario usuario) {
+        public string GenerateToken(Usuario usuario)
+        {
 
             var claims = new List<Claim>
             {

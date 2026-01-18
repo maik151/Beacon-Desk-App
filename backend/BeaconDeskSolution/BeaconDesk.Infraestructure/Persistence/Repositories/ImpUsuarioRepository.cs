@@ -1,8 +1,8 @@
 ﻿
 using BeaconDesk.Domain.AunthenticacionModule.Abstractions;
 using BeaconDesk.Domain.AunthenticacionModule.Entities;
-using Microsoft.EntityFrameworkCore;
 using BeaconDesk.Infraestructure.Persistence.DbContext;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace BeaconDesk.Infraestructure.Persistence.Repositories

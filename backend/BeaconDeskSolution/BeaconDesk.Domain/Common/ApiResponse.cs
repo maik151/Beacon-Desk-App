@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace BeaconDesk.Domain.Common
 {
@@ -33,7 +28,7 @@ namespace BeaconDesk.Domain.Common
             StatusCode = statusCode;
             Success = false;
             Message = message;
-            Detail = detail; 
+            Detail = detail;
         }
 
 
